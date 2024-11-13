@@ -26,9 +26,19 @@ services:
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
-      - "8080:8080"
+      - "8085:8080"
     depends_on:
       - keycloak_db
+  backend:
+    build:
+      context: api
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./api/app:/app  # Для локальной разработки, чтобы можно было видеть изменения без пересборки
+    depends_on:
+      - keycloak
   frontend:
     build:
       context: ./frontend
@@ -36,7 +46,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:8000
-      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_API_URL: http://localhost:8005
+      REACT_APP_KEYCLOAK_URL: http://localhost:8085
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
