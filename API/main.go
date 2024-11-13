@@ -29,6 +29,22 @@ const (
 	CFG_ALLOW_ROLE_DEFAULT      = "prothetic_user"
 )
 
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 
 	// Prepare config
@@ -43,11 +59,7 @@ func main() {
 	router := gin.Default()
 	router.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
 	router.Use(gin.Recovery())
-
-	keycloakConfig2 := ginkeycloak.KeycloakConfig{
-		Url:   viper.GetString(CFG_KEYCLOAK_URL),
-		Realm: viper.GetString(CFG_KEYCLOAK_REALM),
-	}
+	router.Use(cors.Default())
 
 	// Prepare keycloack
 	keycloackConfig := ginkeycloak.BuilderConfig{
@@ -57,24 +69,12 @@ func main() {
 
 	// Add private api
 	privateApi := router.Group("/reports")
-	privateApi.Use(ginkeycloak.NewAccessBuilder(keycloackConfig).
-		RestrictButForRealm(viper.GetString(CFG_ALLOW_ROLE)).Build(),
-		cors.Default())
+	privateApi.Use(
+		ginkeycloak.NewAccessBuilder(keycloackConfig).
+			RestrictButForRealm(viper.GetString(CFG_ALLOW_ROLE)).Build(),
+	)
 	privateApi.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, "ok")
-	})
-
-	privateApi2 := router.Group("/private")
-	privateApi2.Use(ginkeycloak.Auth(ginkeycloak.AuthCheck(), keycloakConfig2))
-	privateApi2.GET("/", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "All Good")
-	})
-
-	// Add public api
-	publicApi := router.Group("/public")
-	publicApi.GET("/", func(c *gin.Context) {
-		time.Sleep(5 * time.Second)
-		c.String(http.StatusOK, "Welcome Gin Server")
 	})
 
 	// Prepare server
