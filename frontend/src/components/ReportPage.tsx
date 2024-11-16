@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { useKeycloak } from '@react-keycloak/web';
 
+class SuccessMessage extends React.Component<{ message: string }> {
+  render() {
+    return <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
+      {this.props.message}
+    </div>;
+  }
+}
+
 const ReportPage: React.FC = () => {
   const { keycloak, initialized } = useKeycloak();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const downloadReport = async () => {
     if (!keycloak?.token) {
@@ -15,6 +24,7 @@ const ReportPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+      setSuccess(null);
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/reports`, {
         headers: {
@@ -22,7 +32,10 @@ const ReportPage: React.FC = () => {
         }
       });
 
-      
+      if (response.ok) {
+        setSuccess('Report downloaded successfully');
+      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -67,6 +80,7 @@ const ReportPage: React.FC = () => {
             {error}
           </div>
         )}
+        {success && <SuccessMessage message={success} />}
       </div>
     </div>
   );
