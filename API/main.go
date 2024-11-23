@@ -20,7 +20,7 @@ const (
 	CFG_PORT                    = "port"
 	CFG_PORT_DEFAULT            = "8090"
 	CFG_KEYCLOAK_URL            = "keycloak_url"
-	CFG_KEYCLOAK_URL_DEFAULT    = "http://192.168.68.104:8080"
+	CFG_KEYCLOAK_URL_DEFAULT    = "http://keycloak:8080"
 	CFG_KEYCLOAK_REALM          = "keycloak_realm"
 	CFG_KEYCLOAK_REALM_DEFAULT  = "reports-realm"
 	CFG_KEYCLOAK_CLIENT         = "keycloak_client"
@@ -28,22 +28,6 @@ const (
 	CFG_ALLOW_ROLE              = "allow_role"
 	CFG_ALLOW_ROLE_DEFAULT      = "prothetic_user"
 )
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	}
-}
 
 func main() {
 
@@ -59,7 +43,14 @@ func main() {
 	router := gin.Default()
 	router.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
 	router.Use(gin.Recovery())
-	router.Use(cors.Default())
+
+  headers := []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With", "Token"}
+
+	cfg := cors.DefaultConfig()
+	cfg.AllowAllOrigins = true
+	cfg.AllowCredentials = true
+	cfg.AllowHeaders = append(cfg.AllowHeaders, headers...)
+	router.Use(cors.New(cfg))
 
 	// Prepare keycloack
 	keycloackConfig := ginkeycloak.BuilderConfig{

@@ -47,7 +47,8 @@ services:
     ports:
       - "8090:8090"
     environment:
-      - keycloak_url=http://keycloak:8080
-      - keycloak_realm=reports-realm
-      - keycloak_client=reports-api
-      - allow_role=prothetic_user
+      keycloak_url: http://keycloak:8080
+      keycloak_realm: reports-realm
+      keycloak_client: reports-api
+      allow_role: prothetic_user
+      port: 8090
