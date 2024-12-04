@@ -40,7 +40,7 @@ public class ReportController {
                 .stream(roles.spliterator(), false)
                 .map(JsonNode::asText)
                 .toList();
-        if (objects.getFirst().equals("prothetic_user")) {
+        if (objects.get(0).equals("prothetic_user")) {
             return new ResponseEntity<>(reportService.getReport(), HttpStatus.OK);
         } else {
             logger.info("report is not allowed for this user");
