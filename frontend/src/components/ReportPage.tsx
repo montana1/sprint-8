@@ -5,8 +5,10 @@ const ReportPage: React.FC = () => {
   const { keycloak, initialized } = useKeycloak();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [response, setResponse] = useState<string | null>(null);
 
   const downloadReport = async () => {
+    setResponse(null);
     if (!keycloak?.token) {
       setError('Not authenticated');
       return;
@@ -21,6 +23,11 @@ const ReportPage: React.FC = () => {
           'Authorization': `Bearer ${keycloak.token}`
         }
       });
+
+      if (response) {
+        const text = await response.text();
+        setResponse(text);
+      }
 
       
     } catch (err) {
@@ -61,6 +68,8 @@ const ReportPage: React.FC = () => {
         >
           {loading ? 'Generating Report...' : 'Download Report'}
         </button>
+
+        {!!response ? <>Тело отчета: {response}</> : <></> }
 
         {error && (
           <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
