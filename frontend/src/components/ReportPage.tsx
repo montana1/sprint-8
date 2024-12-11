@@ -5,6 +5,7 @@ const ReportPage: React.FC = () => {
   const { keycloak, initialized } = useKeycloak();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const downloadReport = async () => {
     if (!keycloak?.token) {
@@ -22,6 +23,11 @@ const ReportPage: React.FC = () => {
         }
       });
 
+      if (response.ok) {
+        setSuccess(`Success: Report generated`);
+      } else {
+        setError(`Error: Can't generate report`);
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -67,6 +73,20 @@ const ReportPage: React.FC = () => {
             {error}
           </div>
         )}
+        {success && (
+            <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
+              {success}
+            </div>
+        )}
+
+        <br/>
+        <button
+            onClick={() => keycloak.logout()}
+            className={`px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600`}
+            style={{marginTop: 16}}
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
