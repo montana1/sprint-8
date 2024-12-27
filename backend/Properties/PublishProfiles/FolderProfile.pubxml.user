@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\GitHub\architecture-sprint-8 — копия\backend\bin\Release\net6.0\publish\</_PublishTargetUrl>
+    <History>True|2024-12-25T00:03:32.8035290Z;True|2024-12-25T02:41:54.2978065+03:00;True|2024-12-24T19:35:57.5067178+03:00;True|2024-12-24T19:34:56.0934593+03:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include=".dockerignore">
+      <publishTime>10/07/2024 23:25:39</publishTime>
+    </File>
+    <File Include="Dockerfile">
+      <publishTime>12/25/2024 02:43:28</publishTime>
+    </File>
+  </ItemGroup>
+</Project>
