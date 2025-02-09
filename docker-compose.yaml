@@ -48,4 +48,5 @@ services:
     ports:
       - "8000:8000"
     environment:
-      PUBLIC_KEY: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzOqyv2IoDW1uT1QzxszmY3Zve7I/m+0JBBu4p/poKvK2WksSvU6uN3ySYJs8oZwPbKsJh3X5R8cGfZdlq/4oaAavwpaIjmZ0T5dF+qF4PdJXnB8PBwCnot/3SsL/faVv8wgq20T+zPb/UnD2NLts5LqpJf8nuRXuuzZKlek0/0AOho3e7OIgRijJFzNbRHMkpbIZAyEjC5ZLQ1Cwg7GxAAvclzyUU/vxw4E722Al3f3n0CVokP1LX+JLKPOYxsOciCSw0miPgeB3dImtljjjIgIqQcTFrRUcmXutv+hzr7a9vjhmSn64VSi9wWgoBqWk/wGEmeO9bLhE05k6TNa77QIDAQAB"
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: reports-realm

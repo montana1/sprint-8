@@ -5,17 +5,19 @@ from io import BytesIO
 from random import randint
 from typing import Annotated
 
+import httpx
 import jwt
-from cryptography.hazmat.primitives import serialization
 from fastapi import Depends, FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security.utils import get_authorization_scheme_param
+from jwt.algorithms import RSAAlgorithm
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 
 
-PUBLIC_KEY = os.getenv('PUBLIC_KEY')
+KEYCLOAK_URL = os.getenv('KEYCLOAK_URL')
+KEYCLOAK_REALM = os.getenv('KEYCLOAK_REALM')
 
 pothetic_reports_db = {
     'prothetic1': [f'prothetic1 report row {i}' for i in range(randint(1, 10))],
@@ -23,7 +25,6 @@ pothetic_reports_db = {
     'prothetic3': [f'prothetic3 report row {i}' for i in range(randint(1, 10))],
 }
 
-public_key = serialization.load_der_public_key(b64decode(PUBLIC_KEY))
 
 app = FastAPI()
 
@@ -34,6 +35,14 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+async def public_key() -> RSAAlgorithm:
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f'{KEYCLOAK_URL}/realms/{KEYCLOAK_REALM}/protocol/openid-connect/certs')
+        response.raise_for_status()
+        jwks = response.json()
+        return RSAAlgorithm.from_jwk(jwks['keys'][0])
 
 
 async def bearer_token(request: Request) -> str:
@@ -48,14 +57,14 @@ async def bearer_token(request: Request) -> str:
     return param
 
 
-async def jwt_payload(token: Annotated[str, Depends(bearer_token)]) -> dict:
+async def jwt_payload(token: Annotated[str, Depends(bearer_token)], public_key_: Annotated[RSAAlgorithm, Depends(public_key)]) -> dict:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='Could not validate credentials',
         headers={'WWW-Authenticate': 'Bearer'},
     )
     try:
-        return jwt.decode(token, public_key, algorithms=['RS256'])
+        return jwt.decode(token, public_key_, algorithms=['RS256'])
     except InvalidTokenError:
         raise credentials_exception
 
