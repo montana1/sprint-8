@@ -11,11 +11,6 @@ const port = 8000;
 const app = express();
 app.use(cors());
 
-/*
-  > curl -X GET http://localhost:8000/reports \
-  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
-*/
-
 app.get('/reports', async (req, res) => {
 
   const token = req.headers.authorization.split(' ')[1];
@@ -33,7 +28,6 @@ app.get('/reports', async (req, res) => {
   try {
     jwt.verify(token, `-----BEGIN PUBLIC KEY-----\n${realmsRes.data.public_key}\n-----END PUBLIC KEY-----\n`, { algorithms: ['RS256'] });
   } catch (error) {
-    console.log(error)
     res.status(403).json({ error: 'Invalid token' });
     return
   }
