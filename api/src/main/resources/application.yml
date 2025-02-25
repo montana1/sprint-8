@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: api
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI:http://localhost:8080/realms/reports-realm}
+server:
+  port: 8080
+
