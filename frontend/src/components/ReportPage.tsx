@@ -17,8 +17,10 @@ const ReportPage: React.FC = () => {
       setError(null);
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/reports`, {
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${keycloak.token}`
+          'Authorization': `Bearer ${keycloak.token}`,
+          'Content-Type': 'application/json'
         }
       });
 
