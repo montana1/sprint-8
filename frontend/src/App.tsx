@@ -10,6 +10,10 @@ const keycloakConfig: KeycloakConfig = {
 };
 
 const keycloak = new Keycloak(keycloakConfig);
+keycloak.init({
+    onLoad: 'login-required',
+    pkceMethod: 'S256'
+});
 
 const App: React.FC = () => {
   return (

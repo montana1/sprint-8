@@ -5,6 +5,7 @@ const ReportPage: React.FC = () => {
   const { keycloak, initialized } = useKeycloak();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [text, setTextContent] = useState<any>(null);
 
   const downloadReport = async () => {
     if (!keycloak?.token) {
@@ -22,6 +23,9 @@ const ReportPage: React.FC = () => {
         }
       });
 
+      const data = await response.json();
+      console.log(data);
+      setTextContent(data);
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -66,6 +70,12 @@ const ReportPage: React.FC = () => {
           <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
             {error}
           </div>
+        )}
+
+        {text && (
+            <div className="mt-4 p-4 bg-green-100 text-green-700 rounded">
+              {JSON.stringify(text, null, 2)}
+            </div>
         )}
       </div>
     </div>

@@ -40,3 +40,20 @@ services:
       REACT_APP_KEYCLOAK_URL: http://localhost:8080
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: report_api
+    restart: on-failure
+    command: /bin/sh -c "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    environment:
+      APP_KEYCLOAK_URL: http://keycloak:8080
+      APP_KEYCLOAK_REALM: reports-realm
+      APP_KEYCLOAK_CLIENT_ID: reports-api
+      APP_KEYCLOAK_CLIENT_SECRET: oNwoLQdvJAvRcL89SydqCWCe5ry1jMgq
+    depends_on:
+      - keycloak
