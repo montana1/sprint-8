@@ -47,3 +47,7 @@ services:
       dockerfile: Dockerfile
     ports:
      - 8000:8000
+    environment:
+      BACKEND_API_KEYCLOAK_URL: http://keycloak:8080/
+      BACKEND_API_KEYCLOAK_REALM: reports-realm
+      BACKEND_API_KEYCLOAK_CLIENT_ID: reports-api
