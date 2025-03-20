@@ -36,6 +36,21 @@ app.MapGet("/weatherforecast", () =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
+
+app.MapGet("/reports", () =>
+{
+    var reports = new[]
+    {
+        new { Data1 = "Value 1", Data2 = "Value 2", Data3 = "Value 3" },
+        new { Data1 = "Value 4", Data2 = "Value 5", Data3 = "Value 6" },
+        new { Data1 = "Value 7", Data2 = "Value 8", Data3 = "Value 9" }
+    };
+
+    return Results.Ok(reports);
+})
+.WithName("GetReports")
+.WithOpenApi();
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
