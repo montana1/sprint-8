@@ -20,9 +20,8 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak_db
       KC_DB_USERNAME: keycloak_user
       KC_DB_PASSWORD: keycloak_password
-    command: 
-      - start-dev
-      - --import-realm
+      KC_IMPORT: /opt/keycloak/data/import/realm-export.json  
+    command: ["start-dev"]
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
