@@ -1,9 +1,31 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+using ReportApi.Authorization;
+using ReportApi.Constants;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configure JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "http://localhost:8080/realms/reports-realm";
+        options.Audience = "reports-frontend";
+        options.RequireHttpsMetadata = false; 
+    });
+
+// Configure Authorization
+builder.Services.AddScoped<IAuthorizationHandler, RealmAccessHandler>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ReportsAccess", policy =>
+        policy.Requirements.Add(new RealmAccessRequirement(Roles.ProtheticUser)));
+});
 
 var app = builder.Build();
 
@@ -16,26 +38,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Add authentication & authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
-
+app.MapControllers();
 
 app.MapGet("/reports", () =>
 {
@@ -49,11 +56,7 @@ app.MapGet("/reports", () =>
     return Results.Ok(reports);
 })
 .WithName("GetReports")
-.WithOpenApi();
+.WithOpenApi()
+.RequireAuthorization("ReportsAccess");
 
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+app.Run(); 
