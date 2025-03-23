@@ -15,12 +15,11 @@ builder.Services.AddScoped<IClaimsTransformation, KeycloakRolesClaimsTransformer
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
-        options.Authority = "http://localhost:8080/realms/reports-realm"; 
+        options.Authority = "http://keycloak:8080/realms/reports-realm"; 
         options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = false,
-            ValidateLifetime = false, 
+            ValidateAudience = false, 
             ValidateIssuer = false
         };
     });
