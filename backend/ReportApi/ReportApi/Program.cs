@@ -11,6 +11,19 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IClaimsTransformation, KeycloakRolesClaimsTransformer>();
 
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins"; 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy =>
+        {
+            policy
+                .WithOrigins("*") 
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -41,7 +54,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Add authentication & authorization middleware
+app.UseCors(myAllowSpecificOrigins);
 app.UseAuthentication();
 app.UseAuthorization();
 

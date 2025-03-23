@@ -1,2 +1,4 @@
 /postgres-keycloak-data
 2024__yandex-architecture-sso.code-workspace
+/backend/ReportApi/ReportApi/bin/
+/backend/ReportApi/ReportApi/obj/
