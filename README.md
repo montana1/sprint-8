@@ -76,8 +76,18 @@ services:
 ##### Проверка работы
 Запуск системы 
 
+Для локального запуска реализованного бэкенда можно использовать скрипты build->start из package.json 
+
+> [!WARNING]
+> Для запуска в докере необходимо явно прописать URL сервера Keycloak, 
+> заменив localhost в docker-compose и файлах .env
+
+![image](https://github.com/user-attachments/assets/2d7deb1e-791c-4057-8087-790e39f29631)
+![image](https://github.com/user-attachments/assets/56d2cedc-2ae9-41b8-ab6f-2c0161c83063)
+![image](https://github.com/user-attachments/assets/767c1e24-cae6-4fdf-bd6d-2b71b95e11bc)
+
 ```bash
-docker-compose up --build
+docker-compose up -d --build
 ```
 
 * Фронтенд на http://localhost:3000, войти под пользователем с ролью prothetic_user (например, prothetic1/prothetic123)
@@ -85,6 +95,11 @@ docker-compose up --build
 * Доступ к API http://localhost:8000/reports - доступ есть.
 
 * Если войти под пользователем без нужной роли (например, user1/password123), доступ к API запрещён.
+
+![image](https://github.com/user-attachments/assets/cb0bff21-11d9-42e2-8522-fbf39be6f482)
+
+![image](https://github.com/user-attachments/assets/29ca737b-5b7c-4ecb-acc9-9e99589269cb)
+
 
 ##### В итоге реализация обеспечивает:
 
