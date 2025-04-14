@@ -22,9 +22,25 @@ const ReportPage: React.FC = () => {
         }
       });
 
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.error || `Error: ${response.status} ${response.statusText}`
+        );
+      }
       
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'report.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Download error:', err);
     } finally {
       setLoading(false);
     }
@@ -50,7 +66,16 @@ const ReportPage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6">Usage Reports</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Usage Reports</h1>
+        </div>
+
+        <button
+            onClick={() => keycloak.logout()}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Logout
+        </button>
         
         <button
           onClick={downloadReport}
