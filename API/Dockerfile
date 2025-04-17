@@ -3,7 +3,7 @@ COPY --chown=maven:maven .. /opt
 WORKDIR /opt
 RUN mvn clean package -DskipTests
 
-FROM bellsoft/liberica-openjre-debian:17 AS extractor
+FROM bellsoft/liberica-openjre-alpine-musl:17 AS extractor
 WORKDIR /opt
 
 FROM extractor

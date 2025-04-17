@@ -3,10 +3,16 @@ version: '3.8'
 volumes:
   postgres-keycloak-data:
 
+networks:
+  sprint8:
+    driver: bridge
+
 
 services:
   keycloak_db:
     image: postgres:15
+    networks:
+      - sprint8
     environment:
       POSTGRES_DB: keycloak_db
       POSTGRES_USER: keycloak_user
@@ -18,6 +24,8 @@ services:
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:21.1
+    networks:
+      - sprint8
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -35,6 +43,8 @@ services:
     depends_on:
       - keycloak_db
   frontend:
+    networks:
+      - sprint8
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -46,9 +56,11 @@ services:
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
   backend:
+    networks:
+      - sprint8
     build: ./API
     ports:
       - "8000:8000"
     container_name: backend
     environment:
-      KEYCLOAK_CERT_URL: http://keycloak:8080/realms/reports-realm/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_SET_URI: http://keycloak:8080/realms/reports-realm/protocol/openid-connect/certs
