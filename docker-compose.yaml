@@ -1,8 +1,8 @@
-version: '3.8'
+version: '3.9'
 
 services:
   keycloak_db:
-    image: postgres:14
+    image: postgres:14-alpine
     environment:
       POSTGRES_DB: keycloak_db
       POSTGRES_USER: keycloak_user
@@ -23,6 +23,7 @@ services:
     command: 
       - start-dev
       - --import-realm
+      - --hostname=localhost
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
@@ -32,11 +33,20 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:8000
-      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_API_URL: http://backend:8000
+      REACT_APP_KEYCLOAK_URL: http://keycloak:8080
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
+    depends_on:
+      - keycloak
+      - backend
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - keycloak
