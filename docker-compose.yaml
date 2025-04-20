@@ -48,6 +48,9 @@ services:
         context: ./api
         dockerfile: Dockerfile
       ports:
-        - "8001:8001"
+        - "8001:8000"
+      environment:
+        KEYCLOAK_URL: http://keycloak:8080
+        KEYCLOAK_REALM: reports-realm
       depends_on:
         - keycloak

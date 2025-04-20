@@ -89,6 +89,7 @@ def validate_token(authorization: str = Header(None)):
     except jwt.JWTError as e:
         raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
+        # logger.exception("got expection on validation")
         raise HTTPException(status_code=401, detail="Unexpected validation error")
 
     return payload
