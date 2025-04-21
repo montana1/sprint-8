@@ -14,7 +14,6 @@ export class KeycloakGuard implements CanActivate {
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const token = this.extractToken(request);
-
 		const isValid = await this.keycloakService.validateToken(token);
 		if (!isValid) throw new ForbiddenException('Invalid token');
 
