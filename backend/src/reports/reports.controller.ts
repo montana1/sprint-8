@@ -16,8 +16,8 @@ export class ReportsController {
 	async getSummary() {
 		const report = await this.reportsService.generateReport();
 		return {
-			users: report.metrics.users,
-			revenue: report.metrics.revenue
+			mkactivity: report.metrics.mkactivity,
+			revenue: report.metrics.testData
 		};
 	}
 }

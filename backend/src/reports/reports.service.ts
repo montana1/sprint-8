@@ -7,6 +7,7 @@ export class ReportsService {
 			id: Math.random().toString(36).substring(7),
 			date: new Date().toISOString(),
 			metrics: {
+				testData: (Math.random() * 5555).toFixed(2),
 				mkactivity: (Math.random() * 10000).toFixed(2),
 				sessions: Math.floor(Math.random() * 5000),
 				conversion: (Math.random() * 10).toFixed(2) + '%'
