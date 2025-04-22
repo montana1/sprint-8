@@ -1,34 +1,80 @@
-version: '3.8'
+version: '3.9'
 
 services:
   keycloak_db:
     image: postgres:14
     environment:
-      POSTGRES_DB: keycloak_db
-      POSTGRES_USER: keycloak_user
-      POSTGRES_PASSWORD: keycloak_password
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
-      - ./postgres-keycloak-data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend-network
+
   keycloak:
-    image: quay.io/keycloak/keycloak:21.1
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev --db=postgres --db-url=jdbc:postgresql://keycloak_db:5432/keycloak --db-username=keycloak --db-password=keycloak
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
     environment:
+      KC_HEALTH_ENABLED: "true"
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_PROXY: edge
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak_db
-      KC_DB_USERNAME: keycloak_user
-      KC_DB_PASSWORD: keycloak_password
-    command: 
-      - start-dev
-      - --import-realm
-    volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_TRANSACTION_XA_ENABLED: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME: localhost:8080  # Явно укажите порт
+      KC_HOSTNAME_STRICT: "false"
+      KC_IMPORT: /opt/keycloak/data/import/realm-export.json
+      KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
+    depends_on:
+      keycloak_db:
+        condition: service_healthy
     ports:
       - "8080:8080"
+    networks:
+      - backend-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      KEYCLOAK_URL: "http://keycloak:8080"
+      KEYCLOAK_REALM: "reports-realm"  # Должен совпадать с созданным realm
+      KEYCLOAK_CLIENT_ID: "reports-backend"  # Должен совпадать с клиентом
+      KEYCLOAK_CLIENT_SECRET: "auPLheuErIRuB9JvFWoi15MJFYIRDrGz"  # Вставьте секрет из Keycloak
+      NODE_ENV: "development"
+    ports:
+      - "3001:3001"
     depends_on:
-      - keycloak_db
+      keycloak:
+        condition: service_started
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3001" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend-network
+
   frontend:
     build:
       context: ./frontend
@@ -36,21 +82,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      REACT_APP_API_URL: http://localhost:8000
-      REACT_APP_KEYCLOAK_URL: http://localhost:8080
+      REACT_APP_API_URL: http://backend:3001  # Для запросов к API
+      REACT_APP_KEYCLOAK_URL: http://keycloak:8080  # Для Docker-сети
+      REACT_APP_KEYCLOAK_PUBLIC_URL: http://localhost:8080  # Для браузера
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "3001:3001"
-    environment:
-      - KEYCLOAK_URL=http://keycloak:8080
-      - KEYCLOAK_REALM=reports-realm
-      - KEYCLOAK_CLIENT_ID=reports-backend
-      - NODE_ENV=development
+    networks:
+      - backend-network
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_started
+
+volumes:
+  postgres-data:
+
+networks:
+  backend-network:
+    driver: bridge
