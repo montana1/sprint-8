@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   keycloak_db:
     image: postgres:14
@@ -40,7 +38,7 @@ services:
       KC_DB_PASSWORD: keycloak
       KC_TRANSACTION_XA_ENABLED: "false"
       KC_HTTP_ENABLED: "true"
-      KC_HOSTNAME: localhost:8080  # Явно укажите порт
+      KC_HOSTNAME: localhost:8080
       KC_HOSTNAME_STRICT: "false"
       KC_IMPORT: /opt/keycloak/data/import/realm-export.json
       KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
@@ -56,22 +54,31 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    command: npm run start:dev
+    user: "node"
+
+    volumes:
+      - type: bind
+        source: ./backend
+        target: /usr/src/app
+        consistency: delegated
+      - /usr/src/app/node_modules
+      - ./backend:/usr/src/app
     environment:
+      CHOKIDAR_USEPOLLING: "true"
       KEYCLOAK_URL: "http://keycloak:8080"
-      KEYCLOAK_REALM: "reports-realm"  # Должен совпадать с созданным realm
-      KEYCLOAK_CLIENT_ID: "reports-backend"  # Должен совпадать с клиентом
-      KEYCLOAK_CLIENT_SECRET: "auPLheuErIRuB9JvFWoi15MJFYIRDrGz"  # Вставьте секрет из Keycloak
+      KEYCLOAK_REALM: "reports-realm"
+      KEYCLOAK_CLIENT_ID: "reports-frontend"
+      KEYCLOAK_CLIENT_SECRET: "qYX4EUAlEcIM1uUblvXGjooF6JNL1hmv"
       NODE_ENV: "development"
+    env_file:
+      - ./backend/.env
     ports:
       - "3001:3001"
+      - "9229:9229" #debugger тут
     depends_on:
       keycloak:
         condition: service_started
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3001" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
     networks:
       - backend-network
 

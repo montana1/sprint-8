@@ -1,25 +1,18 @@
 FROM node:16-alpine
-
 WORKDIR /usr/src/app
 
-# Устанавливаем системные зависимости (включая curl)
 RUN apk add --no-cache curl
 
-# Устанавливаем node зависимости
-COPY package*.json ./
+RUN mkdir -p /usr/src/app/dist && \
+    chown -R node:node /usr/src/app
+
+COPY --chown=node:node package*.json ./
+
+USER node
+
 RUN npm install
 
-# Копируем исходники
-COPY . .
-
-# Для дебаггера и hot-reload
-RUN npm install --save-dev @nestjs/cli
+COPY --chown=node:node . .
 
 EXPOSE 3001
-
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD curl -f http://localhost:3001/health || exit 1
-
-# Оставьте вашу текущую команду запуска (если есть)
-# Например:
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:dev"]
