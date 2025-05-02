@@ -1,0 +1,25 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: bionicpro-api
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: reports-api
+            client-secret: oNwoLQdvJAvRcL89SydqCWCe5ry1jMgq
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+              - email
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://keycloak:8080/realms/reports-realm}
+#          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/reports-realm}
