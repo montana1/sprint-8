@@ -24,11 +24,11 @@ public class WebSecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/main").permitAll()
-                        .requestMatchers("/report").permitAll()
+                        .requestMatchers("/report").hasRole("prothetic_user")
                 );
         http.oauth2ResourceServer(resourceServer -> resourceServer
                 .jwt()
-//                .jwtAuthenticationConverter(rolesClaimConverter)
+                .jwtAuthenticationConverter(rolesClaimConverter)
         );
         return http.build();
     }

@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ReportController {
 
-//    @PreAuthorize("hasRole('PROTHETIC_USER')")
-//    @PreAuthorize("hasAnyRole({'PROTHETIC_USER'})")
-    @CrossOrigin(origins = {"http://localhost:3000","http://frontend:3000"})
     @RequestMapping(method = RequestMethod.GET,
             value = "/report",
             produces = MediaType.APPLICATION_JSON_VALUE)
