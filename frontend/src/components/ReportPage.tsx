@@ -7,6 +7,8 @@ const ReportPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const downloadReport = async () => {
+    console.log('process.env.REACT_APP_API_URL', process.env.REACT_APP_API_URL);
+    
     if (!keycloak?.token) {
       setError('Not authenticated');
       return;
@@ -15,7 +17,6 @@ const ReportPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
       const response = await fetch(`${process.env.REACT_APP_API_URL}/reports`, {
         headers: {
           'Authorization': `Bearer ${keycloak.token}`
