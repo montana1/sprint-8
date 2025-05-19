@@ -1,25 +1,16 @@
 import express, {Request, RequestHandler, Response} from 'express';
-import session from 'express-session';
 import Keycloak from 'keycloak-connect';
-import cors from 'cors';
+import cors, {CorsOptions} from 'cors';
 
 
 const app = express();
-// const memoryStore = new session.MemoryStore();
 
-app.use(cors({
-    origin: 'http://localhost:3000', // или ['http://localhost:3000'] если нужно перечислить несколько
-    credentials: false
-}));
-
-// app.use(
-//     session({
-//         secret: 'oNwoLQdvJAvRcL89SydqCWCe5ry1jMgq',
-//         resave: false,
-//         saveUninitialized: true,
-//         store: memoryStore,
-//     })
-// );
+const corsOptions: CorsOptions = {
+    origin: true,
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+};
+app.use(cors(corsOptions));
 
 const keycloak = new Keycloak({}, {
     realm: 'reports-realm',
@@ -30,35 +21,56 @@ const keycloak = new Keycloak({}, {
     'confidential-port': 0,
 });
 
+console.log(keycloak)
+
 app.use(keycloak.middleware());
 
-// const checkProtheticRole: RequestHandler = (req, res, next) => {
-//     const tokenContent = (req as any).kauth?.grant?.access_token?.content;
-//     console.log(tokenContent)
-//     if (!tokenContent) {
-//         res.status(401).json({ error: 'Unauthorized' });
-//         return;
-//     }
-//
-//     const roles = tokenContent.realm_access?.roles || [];
-//     if (!roles.includes('prothetic_user')) {
-//         res.status(403).json({ error: 'Forbidden: not a prothetic_user' });
-//         return;
-//     }
-//
-//     next();
-// };
+app.use((req, res, next) => {
+    console.log('grant:', (req as any).kauth?.grant);
+    next();
+});
 
+const checkToken = (): RequestHandler => {
+    return (req, res, next) => {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.log('Нет токена в заголовке Authorization');
+            console.log('hi')
+            return res.status(401).json({ error: 'Unauthorized: token not provided' });
+        }
+        console.log(authHeader)
+
+        next()
+    };
+};
+
+const requireRole = (requiredRole: string): RequestHandler => {
+    return (req, res, next) => {
+        const token = (req as any).kauth?.grant?.access_token;
+        const roles = token?.content?.realm_access?.roles || [];
+
+        console.log('token:', token);
+        console.log('Roles:', roles);
+
+        if (!roles.includes(requiredRole)) {
+            return res.status(403).json({ error: 'Forbidden: insufficient role' });
+        }
+
+        next();
+    };
+};
 
 app.get(
     '/reports',
-    keycloak.protect((token) => {
-        const roles: string[] = (token as any).realm_access?.roles || [];
-        console.log("Hi")
-        console.log(token)
-        return roles.includes('prothetic_user');
-    }),
-    keycloak.protect(),
+    // keycloak.protect(),
+    checkToken(),
+    requireRole('prothetic_user'),
+    // keycloak.protect((token) => {
+    //     console.log(token)
+    //     const roles = (token as any).content?.realm_access?.roles || [];
+    //     return roles.includes('prothetic_user');
+    // }),
     (req: Request, res: Response) => {
         const username = (req as any).kauth?.grant?.access_token?.content?.preferred_username;
         res.json({

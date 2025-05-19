@@ -119,6 +119,7 @@
         "directAccessGrantsEnabled": true,
         "standardFlowEnabled": true,
         "implicitFlowEnabled": false,
+        "fullScopeAllowed": true,
         "attributes": {
           "pkce.code.challenge.method": "S256"
         }

@@ -1,16 +1,24 @@
-# backend/Dockerfile
 FROM node:18
 
+# Установка socat (для проброса localhost:8080 → keycloak:8080)
+RUN apt-get update && apt-get install -y socat
+
+# Рабочая директория
 WORKDIR /app
 
+# Установка зависимостей
 COPY package*.json ./
 RUN npm install
 
-COPY tsconfig.json ./
-COPY src ./src
+# Установка инструментов разработки
+RUN npm install -g ts-node nodemon
 
-RUN npm install -g ts-node typescript
+# Копируем проект
+COPY . .
 
+# Открываем порт
 EXPOSE 8000
 
-CMD ["npx", "--no-install", "ts-node", "--transpile-only", "src/server.ts"]
+# Запускаем socat и nodemon одновременно
+CMD socat TCP-LISTEN:8080,fork TCP:keycloak:8080 & \
+    nodemon --watch src --ext ts --exec "ts-node src/server.ts"
