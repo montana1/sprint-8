@@ -11,9 +11,13 @@ const keycloakConfig: KeycloakConfig = {
 
 const keycloak = new Keycloak(keycloakConfig);
 
+export const initOptions = {
+  pkceMethod: 'S256' // enforce PKCE for extra SPA security
+};
+
 const App: React.FC = () => {
   return (
-    <ReactKeycloakProvider authClient={keycloak}>
+    <ReactKeycloakProvider authClient={keycloak} initOptions={initOptions}>
       <div className="App">
         <ReportPage />
       </div>
